@@ -1,0 +1,6 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 118 65" width="118" height="65">
+  <rect x="0" y="0" width="118" height="65" fill="#ffffff"></rect>
+  <g transform="translate(10 10) rotate(0 49 22.5)">
+    <text x="0" y="32" font-family="serif" font-size="36px" fill="#d9480f" text-anchor="start" style="white-space: pre;" direction="ltr">ToDo</text>
+  </g>
+</svg>
