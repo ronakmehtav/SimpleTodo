@@ -2,8 +2,8 @@ const containerSelectorString = '#toDos__container';
 const todoListCounter = initializeCounter();
 const Content = new Set();
 
-if (sessionStorage.getItem('todoContent')) {
-    const data = JSON.parse(sessionStorage.getItem('todoContent'));
+if (localStorage.getItem('todoContent')) {
+    const data = JSON.parse(localStorage.getItem('todoContent'));
     if (data.data.length) {
         data.data.forEach(item => Content.add(item));
     }
@@ -18,6 +18,8 @@ document.querySelector(containerSelectorString).append(
         });
     })
 )
+
+
 /**
  *  Global Eventlistner
  * @param {Event} type Events which can occur on a element.
@@ -86,9 +88,14 @@ function initializeCounter(indexFlag) {
 
 addGlobalEventListner('keydown', '#todo__input', addTodo);
 addGlobalEventListner('click', '.todo__ListItem', removeTodo);
+addGlobalEventListner('click', '#clear', () => {
+    Content.clear();
+    setStorage();
+    document.querySelector(containerSelectorString).innerHTML = '';
+})
 
 function setStorage() {
-    return sessionStorage.setItem('todoContent', JSON.stringify({ data: Array.from(Content) }));
+    return localStorage.setItem('todoContent', JSON.stringify({ data: Array.from(Content) }));
 }
 
 function addTodo(event) {
