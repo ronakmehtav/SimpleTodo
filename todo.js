@@ -1,4 +1,5 @@
 const containerSelectorString = '#toDos__container';
+const container = document.querySelector(containerSelectorString);
 const todoListCounter = initializeCounter();
 const Content = new Set();
 
@@ -9,12 +10,44 @@ if (localStorage.getItem('todoContent')) {
     }
 }
 
-document.querySelector(containerSelectorString).append(
+addGlobalEventListner('keydown', '#todo__input', addTodo);
+
+addGlobalEventListner('click', '.removeTodoBtn', removeTodo);
+
+addGlobalEventListner('click', '#clear', () => {
+    Content.clear();
+    localStorage.clear();
+    container.innerHTML = '';
+});
+
+addGlobalEventListner('dragstart', '.todo__ListItem', e => {
+    e.target.classList.add('dragging');
+});
+
+addGlobalEventListner('dragend', '.todo__ListItem', e => {
+    e.target.classList.remove('dragging');
+});
+
+container.addEventListener('dragover', e => {
+    e.preventDefault()
+    console.log('running');
+    const afterElement = getDragAfterElement(container, e.clientY);
+    const draggedElm = document.querySelector('.dragging');
+
+    if (afterElement == null) {
+        container.appendChild(draggedElm);
+    } else {
+        container.insertBefore(draggedElm, afterElement);
+    }
+});
+
+container.append(
     ...Array.from(Content).map(item => {
-        return createElement('li', {
+        return createTodoListItem('li', {
             class: ['todo__ListItem'],
             text: item,
             id: `todo__listItem-${todoListCounter()}`,
+            draggable: 'true',
         });
     })
 )
@@ -86,13 +119,28 @@ function initializeCounter(indexFlag) {
     };
 }
 
-addGlobalEventListner('keydown', '#todo__input', addTodo);
-addGlobalEventListner('click', '.todo__ListItem', removeTodo);
-addGlobalEventListner('click', '#clear', () => {
-    Content.clear();
-    setStorage();
-    document.querySelector(containerSelectorString).innerHTML = '';
-})
+function getDragAfterElement(container,y) {
+    const draggableElements = [...container.querySelectorAll('.todo__ListItem:not(.dragging)')];
+
+    return draggableElements.reduce((closet, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closet.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closet;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element
+}
+
+function createTodoListItem(selector, options) {
+    const { text, ...optionValues } = options;
+    const parent = createElement(selector, optionValues);
+    const span = createElement('span', { text: text, id: `${optionValues.id}_span` });
+    const removeButton = createElement('button', { class: ['removeTodoBtn'], text: 'remove', id: `${optionValues.id}_button` });
+    parent.append(span, removeButton);
+    return parent;
+}
 
 function setStorage() {
     return localStorage.setItem('todoContent', JSON.stringify({ data: Array.from(Content) }));
@@ -104,17 +152,18 @@ function addTodo(event) {
         event.target.value = '';
         Content.add(textContent);
         setStorage();
-        const listItem = createElement('li', {
+        const listItem = createTodoListItem('li', {
             class: ['todo__ListItem'],
             text: textContent,
             id: `todo__listItem-${todoListCounter()}`,
+            draggable: 'true',
         });
-        document.querySelector(containerSelectorString).append(listItem);
+        container.append(listItem);
     }
 }
 
 function removeTodo(event) {
-    Content.delete(event.target.textContent);
+    Content.delete(event.target.parentNode.children[0].textContent);
     setStorage();
-    event.target.remove();
+    event.target.parentNode.remove();
 }
