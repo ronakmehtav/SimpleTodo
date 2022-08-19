@@ -30,7 +30,6 @@ addGlobalEventListner('dragend', '.todo__ListItem', e => {
 
 container.addEventListener('dragover', e => {
     e.preventDefault()
-    console.log('running');
     const afterElement = getDragAfterElement(container, e.clientY);
     const draggedElm = document.querySelector('.dragging');
 
